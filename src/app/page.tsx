@@ -1,103 +1,285 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import DataSection from '@/components/DataSection';
+import { RewardCycleModel } from '@/models';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [databaseName, setDatabaseName] = useState('');
+  const [accountId, setAccountId] = useState('');
+  const [rewardCycleIndex, setRewardCycleIndex] = useState('');
+  const [appliedDatabaseName, setAppliedDatabaseName] = useState('');
+  const [appliedAccountId, setAppliedAccountId] = useState('');
+  const [appliedRewardCycleIndex, setAppliedRewardCycleIndex] = useState('');
+  const [rewardCycleData, setRewardCycleData] = useState<RewardCycleModel | null>(null);
+  const [isLoadingRewardCycle, setIsLoadingRewardCycle] = useState(false);
+  const [rewardCycleError, setRewardCycleError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAppliedDatabaseName(databaseName);
+    setAppliedAccountId(accountId);
+    setAppliedRewardCycleIndex(rewardCycleIndex);
+  };
+
+  const isValidAccountId = (value: string) => {
+    // Allow empty string or valid hex format (0x followed by 40 hex characters)
+    return value === '' || /^0x[0-9a-fA-F]{40}$/.test(value);
+  };
+
+  const isValidRewardCycleIndex = (value: string) => {
+    // Allow empty string or positive integer
+    return value === '' || /^[0-9]+$/.test(value);
+  };
+
+  // Fetch reward cycle data when appliedRewardCycleIndex changes
+  useEffect(() => {
+    if (!appliedRewardCycleIndex) {
+      setRewardCycleData(null);
+      return;
+    }
+
+    const fetchRewardCycleData = async () => {
+      setIsLoadingRewardCycle(true);
+      setRewardCycleError(null);
+      
+      try {
+        const params = new URLSearchParams({
+          rewardCycleIndex: appliedRewardCycleIndex,
+        });
+        
+        if (appliedDatabaseName) {
+          params.append('database', appliedDatabaseName);
+        }
+        
+        const response = await fetch(`/api/rewardCycle?${params.toString()}`);
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to fetch reward cycle data');
+        }
+        
+        setRewardCycleData(result.data);
+      } catch (err) {
+        console.error('Error fetching reward cycle data:', err);
+        setRewardCycleError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setRewardCycleData(null);
+      } finally {
+        setIsLoadingRewardCycle(false);
+      }
+    };
+
+    fetchRewardCycleData();
+  }, [appliedRewardCycleIndex, appliedDatabaseName]);
+
+  // Prepare custom filters based on reward cycle data
+  const getCustomFilters = (collectionName: string) => {
+    if (!appliedRewardCycleIndex || !rewardCycleData) {
+      return {};
+    }
+
+    switch (collectionName) {
+      case 'sign-effective-balances':
+      case 'effective-balances':
+      case 'reward-cycle':
+        return { rewardCycleIndex: parseInt(appliedRewardCycleIndex) };
+      
+      case 'chilled':
+        return {
+          blockNumber: {
+            $gte: rewardCycleData.startBlock,
+            $lte: rewardCycleData.endBlock
+          }
+        };
+      
+      case 'stakers':
+        return {
+          eraIndex: {
+            $gte: rewardCycleData.startEraIndex,
+            $lte: rewardCycleData.endEraIndex
+          }
+        };
+      
+      case 'balances':
+        return {
+          $and: [
+            { startBlock: { $lte: rewardCycleData.endBlock } },
+            { endBlock: { $gte: rewardCycleData.startBlock } }
+          ]
+        };
+      
+      default:
+        return {};
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900">
+      <div className="max-w-[1800px] mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <h1 className="text-3xl font-bold text-gray-100 mb-6">MongoDB Data Dashboard</h1>
+          
+          {/* Filter controls */}
+          <div className="bg-gray-800 shadow rounded-lg p-6 mb-6">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
+              <div className="flex-1">
+                <label htmlFor="databaseName" className="block text-sm font-medium text-gray-200 mb-1">
+                  Database Name
+                </label>
+                <input
+                  type="text"
+                  id="databaseName"
+                  value={databaseName}
+                  onChange={(e) => setDatabaseName(e.target.value)}
+                  placeholder="Enter database name"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-600 rounded-md p-2 border text-gray-200 bg-gray-700"
+                />
+              </div>
+              
+              <div className="flex-1">
+                <label htmlFor="accountId" className="block text-sm font-medium text-gray-200 mb-1">
+                  Account ID
+                </label>
+                <input
+                  type="text"
+                  id="accountId"
+                  value={accountId}
+                  onChange={(e) => setAccountId(e.target.value)}
+                  placeholder="Enter Account Id"
+                  className={`shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-600 rounded-md p-2 border text-gray-200 bg-gray-700 ${
+                    accountId && !isValidAccountId(accountId) ? 'border-red-500' : ''
+                  }`}
+                />
+                {accountId && !isValidAccountId(accountId) && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Invalid account ID format. Should be 0x followed by 40 hex characters.
+                  </p>
+                )}
+              </div>
+              
+              <div className="flex-1">
+                <label htmlFor="rewardCycleIndex" className="block text-sm font-medium text-gray-200 mb-1">
+                  Reward Cycle Index
+                </label>
+                <input
+                  type="text"
+                  id="rewardCycleIndex"
+                  value={rewardCycleIndex}
+                  onChange={(e) => setRewardCycleIndex(e.target.value)}
+                  placeholder="Enter Reward Cycle Index"
+                  className={`shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-600 rounded-md p-2 border text-gray-200 bg-gray-700 ${
+                    rewardCycleIndex && !isValidRewardCycleIndex(rewardCycleIndex) ? 'border-red-500' : ''
+                  }`}
+                />
+                {rewardCycleIndex && !isValidRewardCycleIndex(rewardCycleIndex) && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Invalid reward cycle index. Should be a positive integer.
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <button
+                  type="submit"
+                  disabled={!!(
+                    (accountId && !isValidAccountId(accountId)) ||
+                    (rewardCycleIndex && !isValidRewardCycleIndex(rewardCycleIndex))
+                  )}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed h-10"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </form>
+            
+            {/* Show reward cycle data if loaded */}
+            {isLoadingRewardCycle && (
+              <div className="mt-4 p-3 bg-gray-700 rounded">
+                <p className="text-gray-200">Loading reward cycle data...</p>
+              </div>
+            )}
+            
+            {rewardCycleError && (
+              <div className="mt-4 p-3 bg-red-900 text-red-100 rounded">
+                <p>{rewardCycleError}</p>
+              </div>
+            )}
+            
+            {rewardCycleData && (
+              <div className="mt-4 p-3 bg-gray-700 rounded">
+                <h3 className="text-lg font-medium text-gray-100 mb-2">Reward Cycle {rewardCycleData.rewardCycleIndex} Details</h3>
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                  <div>
+                    <p className="text-sm text-gray-400">Start Block</p>
+                    <p className="text-gray-200">{rewardCycleData.startBlock}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">End Block</p>
+                    <p className="text-gray-200">{rewardCycleData.endBlock}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Start Era</p>
+                    <p className="text-gray-200">{rewardCycleData.startEraIndex}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">End Era</p>
+                    <p className="text-gray-200">{rewardCycleData.endEraIndex}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Data Sections */}
+          <DataSection
+            title="Signed Effective Balances"
+            collectionName="sign-effective-balances"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('sign-effective-balances')}
+          />
+          
+          <DataSection
+            title="Effective Balances"
+            collectionName="effective-balances"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('effective-balances')}
+          />
+          
+          <DataSection
+            title="Reward Cycles"
+            collectionName="reward-cycle"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('reward-cycle')}
+          />
+          
+          <DataSection
+            title="Chilled Accounts"
+            collectionName="chilled"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('chilled')}
+          />
+          
+          <DataSection
+            title="Stakers"
+            collectionName="stakers"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('stakers')}
+          />
+          
+          <DataSection
+            title="Balances"
+            collectionName="balances"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('balances')}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }

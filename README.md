@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vortex Data Dashboard
 
-## Getting Started
+A MongoDB data dashboard for viewing various collections from the Vortex database. This application allows you to view and filter data from multiple collections:
 
-First, run the development server:
+- Signed Effective Balances
+- Effective Balances
+- Chilled Accounts
+- Stakers
+- Balances
+
+## Features
+
+- Dynamically select MongoDB database to query
+- Filter by account ID
+- Pagination support for large datasets
+- Responsive UI built with Next.js, TypeScript, and Tailwind CSS
+
+## Prerequisites
+
+- Node.js 16+ 
+- MongoDB instance with appropriate collections
+
+## Setup
+
+1. Clone this repository
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env.local` file in the root directory based on the `.env.local.example` file:
+
+```
+MONGODB_URI=mongodb://username:password@hostname:port/
+```
+
+Replace with your actual MongoDB connection string, but without specifying a database. The database will be specified through the UI.
+
+## Development
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Using the Dashboard
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Database Selection
+- Enter the database name in the "Database Name" field.
+- This corresponds to the database part of a MongoDB connection string: `mongodb://username:password@hostname:port/database`
+- The connection string in .env.local should NOT include a database name as it will be provided through this field
 
-## Learn More
+### Account Filtering
+- Enter an account ID (0x followed by 40 hex characters) to filter all data sections
+- This will limit results to only show data for the specified account
 
-To learn more about Next.js, take a look at the following resources:
+## MongoDB Collections
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application is designed to work with the following MongoDB collections in your selected database:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `signedEffectiveBalances` - Signed effective balance data
+- `effectiveBalances` - Effective balance data
+- `chilled` - Chilled account records
+- `stakers` - Staker records
+- `balances` - Balance records
 
-## Deploy on Vercel
+## Building for Production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Then start the production server:
+
+```bash
+npm start
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
