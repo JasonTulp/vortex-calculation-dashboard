@@ -7,19 +7,21 @@ import { RewardCycleModel } from '@/models';
 export default function Home() {
   const [databaseName, setDatabaseName] = useState('');
   const [accountId, setAccountId] = useState('');
-  const [rewardCycleIndex, setRewardCycleIndex] = useState('');
+  const [counter, setCounter] = useState(0);
+  const [vtxDistributionId, setVtxDistributionId] = useState('');
   const [appliedDatabaseName, setAppliedDatabaseName] = useState('');
   const [appliedAccountId, setAppliedAccountId] = useState('');
-  const [appliedRewardCycleIndex, setAppliedRewardCycleIndex] = useState('');
+  const [appliedVtxDistributionId, setAppliedVtxDistributionId] = useState('');
   const [rewardCycleData, setRewardCycleData] = useState<RewardCycleModel | null>(null);
   const [isLoadingRewardCycle, setIsLoadingRewardCycle] = useState(false);
   const [rewardCycleError, setRewardCycleError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setCounter(counter + 1);
     setAppliedDatabaseName(databaseName);
     setAppliedAccountId(accountId);
-    setAppliedRewardCycleIndex(rewardCycleIndex);
+    setAppliedVtxDistributionId(vtxDistributionId);
   };
 
   const isValidAccountId = (value: string) => {
@@ -27,14 +29,14 @@ export default function Home() {
     return value === '' || /^0x[0-9a-fA-F]{40}$/.test(value);
   };
 
-  const isValidRewardCycleIndex = (value: string) => {
+  const isValidVtxDistributionId = (value: string) => {
     // Allow empty string or positive integer
     return value === '' || /^[0-9]+$/.test(value);
   };
 
-  // Fetch reward cycle data when appliedRewardCycleIndex changes
+  // Fetch reward cycle data when appliedVtxDistributionId changes
   useEffect(() => {
-    if (!appliedRewardCycleIndex) {
+    if (!appliedVtxDistributionId) {
       setRewardCycleData(null);
       return;
     }
@@ -45,7 +47,7 @@ export default function Home() {
       
       try {
         const params = new URLSearchParams({
-          rewardCycleIndex: appliedRewardCycleIndex,
+          vtxDistributionId: appliedVtxDistributionId,
         });
         
         if (appliedDatabaseName) {
@@ -70,11 +72,11 @@ export default function Home() {
     };
 
     fetchRewardCycleData();
-  }, [appliedRewardCycleIndex, appliedDatabaseName]);
+  }, [appliedVtxDistributionId, appliedDatabaseName, counter]);
 
   // Prepare custom filters based on reward cycle data
   const getCustomFilters = (collectionName: string) => {
-    if (!appliedRewardCycleIndex || !rewardCycleData) {
+    if (!appliedVtxDistributionId || !rewardCycleData) {
       return {};
     }
 
@@ -82,7 +84,7 @@ export default function Home() {
       case 'sign-effective-balances':
       case 'effective-balances':
       case 'reward-cycle':
-        return { rewardCycleIndex: parseInt(appliedRewardCycleIndex) };
+        return { vtxDistributionId: parseInt(appliedVtxDistributionId) };
       
       case 'chilled':
         return {
@@ -158,20 +160,20 @@ export default function Home() {
               </div>
               
               <div className="flex-1">
-                <label htmlFor="rewardCycleIndex" className="block text-sm font-medium text-gray-200 mb-1">
-                  Reward Cycle Index
+                <label htmlFor="vtxDistributionId" className="block text-sm font-medium text-gray-200 mb-1">
+                  Vortex Distribution Id
                 </label>
                 <input
                   type="text"
-                  id="rewardCycleIndex"
-                  value={rewardCycleIndex}
-                  onChange={(e) => setRewardCycleIndex(e.target.value)}
-                  placeholder="Enter Reward Cycle Index"
+                  id="vtxDistributionId"
+                  value={vtxDistributionId}
+                  onChange={(e) => setVtxDistributionId(e.target.value)}
+                  placeholder="Enter Vortex Distribution Id"
                   className={`shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-600 rounded-md p-2 border text-gray-200 bg-gray-700 ${
-                    rewardCycleIndex && !isValidRewardCycleIndex(rewardCycleIndex) ? 'border-red-500' : ''
+                    vtxDistributionId && !isValidVtxDistributionId(vtxDistributionId) ? 'border-red-500' : ''
                   }`}
                 />
-                {rewardCycleIndex && !isValidRewardCycleIndex(rewardCycleIndex) && (
+                {vtxDistributionId && !isValidVtxDistributionId(vtxDistributionId) && (
                   <p className="mt-1 text-sm text-red-600">
                     Invalid reward cycle index. Should be a positive integer.
                   </p>
@@ -183,7 +185,7 @@ export default function Home() {
                   type="submit"
                   disabled={!!(
                     (accountId && !isValidAccountId(accountId)) ||
-                    (rewardCycleIndex && !isValidRewardCycleIndex(rewardCycleIndex))
+                    (vtxDistributionId && !isValidVtxDistributionId(vtxDistributionId))
                   )}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed h-10"
                 >
@@ -207,7 +209,7 @@ export default function Home() {
             
             {rewardCycleData && (
               <div className="mt-4 p-3 bg-gray-700 rounded">
-                <h3 className="text-lg font-medium text-gray-100 mb-2">Reward Cycle {rewardCycleData.rewardCycleIndex} Details</h3>
+                <h3 className="text-lg font-medium text-gray-100 mb-2">Reward Cycle {rewardCycleData.vtxDistributionId} Details</h3>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                   <div>
                     <p className="text-sm text-gray-400">Start Block</p>
@@ -237,6 +239,7 @@ export default function Home() {
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('sign-effective-balances')}
+            refreshTrigger={counter}
           />
           
           <DataSection
@@ -245,6 +248,7 @@ export default function Home() {
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('effective-balances')}
+            refreshTrigger={counter}
           />
           
           <DataSection
@@ -253,6 +257,7 @@ export default function Home() {
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('reward-cycle')}
+            refreshTrigger={counter}
           />
           
           <DataSection
@@ -261,6 +266,7 @@ export default function Home() {
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('chilled')}
+            refreshTrigger={counter}
           />
           
           <DataSection
@@ -269,6 +275,7 @@ export default function Home() {
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('stakers')}
+            refreshTrigger={counter}
           />
           
           <DataSection
@@ -277,6 +284,7 @@ export default function Home() {
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('balances')}
+            refreshTrigger={counter}
           />
         </div>
       </div>

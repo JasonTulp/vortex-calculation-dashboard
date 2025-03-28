@@ -106,6 +106,24 @@ interface DataTableProps<T extends BaseModel> {
   isLoading?: boolean;
 }
 
+// Custom field order definition
+const CUSTOM_FIELD_ORDER = [
+  "account",
+  "vtxDistributionId",
+  "startBlock",
+  "endBlock",
+  "startEraIndex",
+  "endEraIndex",
+  "currentEraIndex",
+  "balance",
+  "balanceChange",
+  "effectiveBalance",
+  "rewardPoints",
+  "percentage",
+  "rate",
+  "totalStake"
+];
+
 export default function DataTable<T extends BaseModel>({
   data,
   pagination,
@@ -116,10 +134,36 @@ export default function DataTable<T extends BaseModel>({
     return <div className="text-center p-8 bg-gray-700 rounded-lg text-gray-300">No data found</div>;
   }
 
-  // Get column names from the first data item, excluding _id
-  const columns = data.length > 0
+  // Get column names from the first data item, excluding _id and metadata fields
+  const unsortedColumns = data.length > 0
     ? Object.keys(data[0]).filter(key => key !== '_id' && key !== 'createdAt' && key !== 'updatedAt')
     : [];
+  
+  // Sort columns according to custom order
+  const columns = [...unsortedColumns].sort((a, b) => {
+    const indexA = CUSTOM_FIELD_ORDER.findIndex(field => 
+      field.toLowerCase() === a.toLowerCase());
+    const indexB = CUSTOM_FIELD_ORDER.findIndex(field => 
+      field.toLowerCase() === b.toLowerCase());
+    
+    // If both fields are in the custom order list
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+    
+    // If only a is in the custom order list
+    if (indexA !== -1) {
+      return -1;
+    }
+    
+    // If only b is in the custom order list
+    if (indexB !== -1) {
+      return 1;
+    }
+    
+    // If neither field is in the custom order list, maintain original order
+    return unsortedColumns.indexOf(a) - unsortedColumns.indexOf(b);
+  });
 
   const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return '-';

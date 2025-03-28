@@ -10,8 +10,7 @@ export interface RewardCycleModel extends BaseModel {
   needToCalculate: boolean;
   bootstrapRewardInTotal?: string;
   workpointsRewardInTotal?: string;
-  vtxDistributionId?: string;
   stakersReward?: string;
   validatorsReward?: string;
-  rewardCycleIndex: number;
+  vtxDistributionId: number;
 } 

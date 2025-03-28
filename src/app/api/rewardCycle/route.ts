@@ -5,10 +5,10 @@ import { RewardCycleModel } from '@/models';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const rewardCycleIndex = searchParams.get('rewardCycleIndex');
+    const vtxDistributionId = searchParams.get('vtxDistributionId');
     const databaseName = searchParams.get('database');
 
-    if (!rewardCycleIndex) {
+    if (!vtxDistributionId) {
       return NextResponse.json({ error: 'Reward cycle index is required' }, { status: 400 });
     }
 
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Find reward cycle by index
     const rewardCycle = await collection.findOne({ 
-      rewardCycleIndex: parseInt(rewardCycleIndex)
+      vtxDistributionId: parseInt(vtxDistributionId)
     }) as RewardCycleModel | null;
 
     if (!rewardCycle) {

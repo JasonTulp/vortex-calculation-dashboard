@@ -5,7 +5,7 @@ export interface SignedEffectiveBalanceModel extends BaseModel {
   totalRewardPoints?: string;
   startBlock: number;
   endBlock: number;
-  rewardCycleIndex: number;
+  vtxDistributionId: number;
   signature?: string;
   timestamp: number;
   verified: boolean;

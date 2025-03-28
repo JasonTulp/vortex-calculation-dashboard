@@ -4,7 +4,7 @@ import { BaseModel } from './BaseModel';
 export interface EffectiveBalanceModel extends BaseModel {
   _id: ObjectId;
   account?: string;
-  rewardCycleIndex: number;
+  vtxDistributionId: number;
   startBlock: number;
   endBlock: number;
   balance?: string;

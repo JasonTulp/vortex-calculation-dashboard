@@ -10,6 +10,7 @@ interface DataSectionProps {
   accountId?: string;
   databaseName?: string;
   customFilters?: Record<string, unknown>;
+  refreshTrigger?: number;
 }
 
 export default function DataSection({ 
@@ -17,7 +18,8 @@ export default function DataSection({
   collectionName, 
   accountId,
   databaseName,
-  customFilters = {}
+  customFilters = {},
+  refreshTrigger = 0
 }: DataSectionProps) {
   const [data, setData] = useState<BaseModel[]>([]);
   const [pagination, setPagination] = useState({
@@ -84,7 +86,7 @@ export default function DataSection({
   useEffect(() => {
     fetchData(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionName, accountId, databaseName, stringifiedFilters]);
+  }, [collectionName, accountId, databaseName, stringifiedFilters, refreshTrigger]);
 
   const handlePageChange = (page: number) => {
     fetchData(page);
