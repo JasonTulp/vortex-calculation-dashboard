@@ -60,7 +60,7 @@ const Pagination = ({ total, page, limit, pages, onPageChange }: PaginationProps
         <button
           onClick={() => page > 1 && onPageChange(page - 1)}
           disabled={page === 1}
-          className="px-4 py-2 rounded bg-gray-700 text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded bg-mid-light text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Previous
         </button>
@@ -71,10 +71,10 @@ const Pagination = ({ total, page, limit, pages, onPageChange }: PaginationProps
             onClick={() => typeof pageNumber === 'number' && onPageChange(pageNumber)}
             className={`px-4 py-2 rounded ${
               pageNumber === page
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary text-white'
                 : pageNumber === '...'
-                ? 'bg-gray-700 text-gray-300 cursor-default'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-mid-light text-gray-300 cursor-default'
+                : 'bg-mid-light text-gray-300 hover:bg-light'
             }`}
             disabled={pageNumber === '...'}
           >
@@ -85,7 +85,7 @@ const Pagination = ({ total, page, limit, pages, onPageChange }: PaginationProps
         <button
           onClick={() => page < pages && onPageChange(page + 1)}
           disabled={page === pages}
-          className="px-4 py-2 rounded bg-gray-700 text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded bg-mid-light text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next
         </button>
@@ -109,9 +109,12 @@ interface DataTableProps<T extends BaseModel> {
 // Custom field order definition
 const CUSTOM_FIELD_ORDER = [
   "account",
+  "nominator",
+  "validator",
   "vtxDistributionId",
   "startBlock",
   "endBlock",
+  "effectiveBlocks",
   "startEraIndex",
   "endEraIndex",
   "currentEraIndex",
@@ -121,7 +124,10 @@ const CUSTOM_FIELD_ORDER = [
   "rewardPoints",
   "percentage",
   "rate",
-  "totalStake"
+  "totalStake",
+  "totalRewardPoints",
+  "submitted",
+  "verified",
 ];
 
 export default function DataTable<T extends BaseModel>({
@@ -131,7 +137,7 @@ export default function DataTable<T extends BaseModel>({
   isLoading = false,
 }: DataTableProps<T>) {
   if (data.length === 0 && !isLoading) {
-    return <div className="text-center p-8 bg-gray-700 rounded-lg text-gray-300">No data found</div>;
+    return <div className="text-center p-8 bg-mid-light rounded-lg text-gray-300">No data found</div>;
   }
 
   // Get column names from the first data item, excluding _id and metadata fields
@@ -181,13 +187,13 @@ export default function DataTable<T extends BaseModel>({
     <div>
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
         </div>
       ) : (
         <>
           <div className="overflow-x-auto scrollbar-custom py-2">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead className="bg-gray-700">
+            <table className="min-w-full divide-y divide-mid-light">
+              <thead className="bg-mid-light">
                 <tr>
                   {columns.map((column) => (
                     <th
@@ -200,9 +206,9 @@ export default function DataTable<T extends BaseModel>({
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-gray-800 divide-y divide-gray-700">
+              <tbody className="bg-mid divide-y divide-mid-light">
                 {data.map((item, index) => (
-                  <tr key={index} className="hover:bg-gray-700">
+                  <tr key={index} className="hover:bg-mid-light">
                     {columns.map((column) => (
                       <td key={column} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300">
                         {formatValue((item as Record<string, unknown>)[column])}

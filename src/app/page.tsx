@@ -128,11 +128,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-dark">
       <div className="max-w-[1800px] mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Filter controls */}
-          <div className="bg-gray-800 shadow rounded-sm p-4 mb-4">
+          <div className="bg-mid shadow rounded-md border border-primary p-4 mb-4">
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
               <div className="flex-1">
                 <label htmlFor="databaseName" className="block text-sm font-bold text-gray-200 mb-1">
@@ -144,7 +144,7 @@ export default function Home() {
                   value={databaseName}
                   onChange={(e) => setDatabaseName(e.target.value)}
                   placeholder="Enter database name"
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-600 rounded-md p-2 border text-gray-200 bg-gray-700"
+                  className="shadow-sm border-light focus:border-primary block w-full sm:text-sm rounded-md p-2 border text-gray-200 bg-mid-light"
                 />
               </div>
               
@@ -158,7 +158,7 @@ export default function Home() {
                   value={accountId}
                   onChange={(e) => setAccountId(e.target.value)}
                   placeholder="Enter Account Id"
-                  className={`shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-600 rounded-md p-2 border text-gray-200 bg-gray-700 ${
+                  className={`shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-light rounded-md p-2 border text-gray-200 bg-mid-light ${
                     accountId && !isValidAccountId(accountId) ? 'border-red-500' : ''
                   }`}
                 />
@@ -179,7 +179,7 @@ export default function Home() {
                   value={vtxDistributionId}
                   onChange={(e) => setVtxDistributionId(e.target.value)}
                   placeholder="Enter Vortex Distribution Id"
-                  className={`shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-600 rounded-md p-2 border text-gray-200 bg-gray-700 ${
+                  className={`shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-light rounded-md p-2 border text-gray-200 bg-mid-light ${
                     vtxDistributionId && !isValidVtxDistributionId(vtxDistributionId) ? 'border-red-500' : ''
                   }`}
                 />
@@ -197,7 +197,7 @@ export default function Home() {
                     (accountId && !isValidAccountId(accountId)) ||
                     (vtxDistributionId && !isValidVtxDistributionId(vtxDistributionId))
                   )}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed h-10"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed h-10"
                 >
                   Apply Filters
                 </button>
@@ -206,7 +206,7 @@ export default function Home() {
             
             {/* Show reward cycle data if loaded */}
             {isLoadingRewardCycle && (
-              <div className="mt-4 p-3 bg-gray-700 rounded">
+              <div className="mt-4 p-3 bg-mid-light rounded">
                 <p className="text-gray-200">Loading reward cycle data...</p>
               </div>
             )}
@@ -218,7 +218,7 @@ export default function Home() {
             )}
             
             {rewardCycleData && (
-              <div className="mt-4 p-3 bg-gray-700 rounded">
+              <div className="mt-4 p-3 bg-mid-light rounded">
                 <h3 className="text-lg font-medium text-gray-100 mb-2">Reward Cycle {rewardCycleData.vtxDistributionId} Details</h3>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                   <div>

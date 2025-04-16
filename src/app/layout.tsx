@@ -25,9 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-darker`}
       >
-        <header className="bg-gray-800 shadow">
+        <header className="bg-mid shadow">
           <div className="max-w-[1400px] mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <h1 className="text-2xl font-bold text-gray-100">Vortex Distribution Dashboard</h1>
           </div>

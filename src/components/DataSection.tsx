@@ -98,14 +98,14 @@ export default function DataSection({
   };
 
   return (
-    <div className={`bg-gray-800 shadow rounded-sm p-2 mb-4 ${isExpanded ? 'border-1 border-gray-600': ''}`}>
+    <div className={`bg-mid shadow rounded-md p-2 mb-4 ${isExpanded ? 'border border-mid-light': ''}`}>
       <div 
         className="flex justify-between items-center cursor-pointer p-2 rounded"
         onClick={toggleExpand}
       >
-        <h2 className="text-xl font-semibold text-gray-100">{title}</h2>
+        <h2 className="text-xl font-semibold text-primary">{title}</h2>
         <div 
-          className="text-gray-300 transition-transform duration-200"
+          className="text-text transition-transform duration-200"
           aria-hidden="true"
         >
           <svg 
@@ -123,7 +123,7 @@ export default function DataSection({
       {isExpanded && (
         <>
           {error ? (
-            <div className="p-4 bg-red-900 text-red-100 rounded-lg mb-4">
+            <div className="p-4 bg-red-900 text-red-100 rounded-sm mb-4">
               {error}
             </div>
           ) : (

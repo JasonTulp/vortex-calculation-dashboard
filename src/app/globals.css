@@ -1,7 +1,9 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #0a0a0a;
+  --background: #0a0c0d;
   --foreground: #ededed;
 }
 
@@ -28,20 +30,20 @@ input::placeholder {
 }
 
 .scrollbar-custom::-webkit-scrollbar-track {
-  background: #1f2937; /* tailwind gray-800 */
+  background: #161a1d; /* tailwind mid */
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  background: #4b5563; /* tailwind gray-600 */
+  background: #2d3134; /* tailwind light */
   border-radius: 4px;
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: #6b7280; /* tailwind gray-500 */
+  background: #d0d1d2; /* tailwind gray-500 */
 }
 
 /* For Firefox */
 .scrollbar-custom {
   scrollbar-width: thin;
-  scrollbar-color: #4b5563 #1f2937;
+  scrollbar-color: #5c5f61 #161a1d;
 }
