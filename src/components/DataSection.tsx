@@ -30,6 +30,7 @@ export default function DataSection({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const fetchData = async (page = 1) => {
     setIsLoading(true);
@@ -92,21 +93,48 @@ export default function DataSection({
     fetchData(page);
   };
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div className="bg-gray-800 shadow rounded-lg p-4 mb-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-100">{title}</h2>
-      
-      {error ? (
-        <div className="p-4 bg-red-900 text-red-100 rounded-md mb-4">
-          {error}
+      <div 
+        className="flex justify-between items-center cursor-pointer p-2 rounded"
+        onClick={toggleExpand}
+      >
+        <h2 className="text-xl font-semibold text-gray-100">{title}</h2>
+        <div 
+          className="text-gray-300 transition-transform duration-200"
+          aria-hidden="true"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className={`h-6 w-6 transform ${isExpanded ? 'rotate-0' : 'rotate-180'}`} 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
-      ) : (
-        <DataTable
-          data={data}
-          pagination={pagination}
-          onPageChange={handlePageChange}
-          isLoading={isLoading}
-        />
+      </div>
+      
+      {isExpanded && (
+        <>
+          {error ? (
+            <div className="p-4 bg-red-900 text-red-100 rounded-md mb-4">
+              {error}
+            </div>
+          ) : (
+            <DataTable
+              data={data}
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              isLoading={isLoading}
+            />
+          )}
+        </>
       )}
     </div>
   );

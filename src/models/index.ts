@@ -5,3 +5,4 @@ export * from './ChilledModel';
 export * from './StakerModel';
 export * from './BalanceModel'; 
 export * from './RewardCycleModel'; 
+export * from './TransactionModel'; 

@@ -87,6 +87,7 @@ export default function Home() {
         return { vtxDistributionId: parseInt(appliedVtxDistributionId) };
       
       case 'chilled':
+      case 'transactions':
         return {
           blockNumber: {
             $gte: rewardCycleData.startBlock,
@@ -119,7 +120,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-[1800px] mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-gray-100 mb-6">MongoDB Data Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-100 mb-6">Vortex Distribution Dashboard</h1>
           
           {/* Filter controls */}
           <div className="bg-gray-800 shadow rounded-lg p-6 mb-6">
@@ -233,12 +234,21 @@ export default function Home() {
           </div>
           
           {/* Data Sections */}
+          
           <DataSection
-            title="Signed Effective Balances"
-            collectionName="sign-effective-balances"
+            title="Reward Cycles"
+            collectionName="reward-cycle"
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('reward-cycle')}
+            refreshTrigger={counter}
+          />
+          
+          <DataSection
+            title="Balances"
+            collectionName="balances"
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
-            customFilters={getCustomFilters('sign-effective-balances')}
+            customFilters={getCustomFilters('balances')}
             refreshTrigger={counter}
           />
           
@@ -252,14 +262,23 @@ export default function Home() {
           />
           
           <DataSection
-            title="Reward Cycles"
-            collectionName="reward-cycle"
+            title="Signed Effective Balances"
+            collectionName="sign-effective-balances"
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
-            customFilters={getCustomFilters('reward-cycle')}
+            customFilters={getCustomFilters('sign-effective-balances')}
             refreshTrigger={counter}
           />
           
+          <DataSection
+            title="Transactions"
+            collectionName="transactions"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('transactions')}
+            refreshTrigger={counter}
+          />
+
           <DataSection
             title="Chilled Accounts"
             collectionName="chilled"
@@ -275,15 +294,6 @@ export default function Home() {
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('stakers')}
-            refreshTrigger={counter}
-          />
-          
-          <DataSection
-            title="Balances"
-            collectionName="balances"
-            accountId={appliedAccountId}
-            databaseName={appliedDatabaseName || undefined}
-            customFilters={getCustomFilters('balances')}
             refreshTrigger={counter}
           />
         </div>
