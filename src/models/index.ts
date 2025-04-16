@@ -6,3 +6,6 @@ export * from './StakerModel';
 export * from './BalanceModel'; 
 export * from './RewardCycleModel'; 
 export * from './TransactionModel'; 
+export * from './AssetPriceModel';
+export * from './ValidatorPayoutModel';
+export * from './NominatorPayoutModel'; 

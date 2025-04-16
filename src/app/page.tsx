@@ -110,6 +110,17 @@ export default function Home() {
             { endBlock: { $gte: rewardCycleData.startBlock } }
           ]
         };
+      case 'asset-prices':
+        return { vtxDistributionId: parseInt(appliedVtxDistributionId) };
+      
+      case 'validator-payouts':
+      case 'nominator-payouts':
+        return {
+          eraIndex: {
+            $gte: rewardCycleData.startEraIndex,
+            $lte: rewardCycleData.endEraIndex
+          }
+        };
       
       default:
         return {};
@@ -120,13 +131,11 @@ export default function Home() {
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-[1800px] mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-gray-100 mb-6">Vortex Distribution Dashboard</h1>
-          
           {/* Filter controls */}
-          <div className="bg-gray-800 shadow rounded-lg p-6 mb-6">
+          <div className="bg-gray-800 shadow rounded-sm p-4 mb-4">
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
               <div className="flex-1">
-                <label htmlFor="databaseName" className="block text-sm font-medium text-gray-200 mb-1">
+                <label htmlFor="databaseName" className="block text-sm font-bold text-gray-200 mb-1">
                   Database Name
                 </label>
                 <input
@@ -140,7 +149,7 @@ export default function Home() {
               </div>
               
               <div className="flex-1">
-                <label htmlFor="accountId" className="block text-sm font-medium text-gray-200 mb-1">
+                <label htmlFor="accountId" className="block text-sm font-bold text-gray-200 mb-1">
                   Account ID
                 </label>
                 <input
@@ -161,7 +170,7 @@ export default function Home() {
               </div>
               
               <div className="flex-1">
-                <label htmlFor="vtxDistributionId" className="block text-sm font-medium text-gray-200 mb-1">
+                <label htmlFor="vtxDistributionId" className="block text-sm font-bold text-gray-200 mb-1">
                   Vortex Distribution Id
                 </label>
                 <input
@@ -287,15 +296,42 @@ export default function Home() {
             customFilters={getCustomFilters('chilled')}
             refreshTrigger={counter}
           />
-          
+
           <DataSection
-            title="Stakers"
-            collectionName="stakers"
-            accountId={appliedAccountId}
+            title="Asset Prices"
+            collectionName="asset-prices"
             databaseName={appliedDatabaseName || undefined}
-            customFilters={getCustomFilters('stakers')}
+            customFilters={getCustomFilters('asset-prices')}
             refreshTrigger={counter}
           />
+          
+          <DataSection
+            title="Validator Payouts"
+            collectionName="validator-payouts"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('validator-payouts')}
+            refreshTrigger={counter}
+          />
+          
+          <DataSection
+            title="Nominator Payouts"
+            collectionName="nominator-payouts"
+            accountId={appliedAccountId}
+            databaseName={appliedDatabaseName || undefined}
+            customFilters={getCustomFilters('nominator-payouts')}
+            refreshTrigger={counter}
+          />
+
+          <DataSection
+              title="Stakers"
+              collectionName="stakers"
+              accountId={appliedAccountId}
+              databaseName={appliedDatabaseName || undefined}
+              customFilters={getCustomFilters('stakers')}
+              refreshTrigger={counter}
+          />
+
         </div>
       </div>
     </div>

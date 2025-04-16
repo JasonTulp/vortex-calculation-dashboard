@@ -98,7 +98,7 @@ export default function DataSection({
   };
 
   return (
-    <div className="bg-gray-800 shadow rounded-lg p-4 mb-6">
+    <div className={`bg-gray-800 shadow rounded-sm p-2 mb-4 ${isExpanded ? 'border-1 border-gray-600': ''}`}>
       <div 
         className="flex justify-between items-center cursor-pointer p-2 rounded"
         onClick={toggleExpand}
@@ -123,7 +123,7 @@ export default function DataSection({
       {isExpanded && (
         <>
           {error ? (
-            <div className="p-4 bg-red-900 text-red-100 rounded-md mb-4">
+            <div className="p-4 bg-red-900 text-red-100 rounded-lg mb-4">
               {error}
             </div>
           ) : (

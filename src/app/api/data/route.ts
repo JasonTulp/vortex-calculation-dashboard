@@ -28,7 +28,16 @@ export async function GET(request: NextRequest) {
     
     // Add account filter if provided
     if (accountId) {
-      query.account = accountId;
+      if (collectionName === 'validator-payouts') {
+        // For validator payouts, filter by the validator field
+        query.validator = { $regex: new RegExp(`^${accountId}$`, 'i') };
+      } else if (collectionName === 'nominator-payouts') {
+        // For nominator payouts, filter by the nominator field
+        query.nominator = { $regex: new RegExp(`^${accountId}$`, 'i') };
+      } else {
+        // For all other collections, filter by account field
+        query.account = { $regex: new RegExp(`^${accountId}$`, 'i') };
+      }
     }
     
     // Parse and add custom filters if provided

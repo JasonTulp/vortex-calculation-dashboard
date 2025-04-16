@@ -21,3 +21,27 @@ body {
 input::placeholder {
   color: #6B7280; /* Darker placeholder text */
 }
+
+/* Custom scrollbar styling */
+.scrollbar-custom::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: #1f2937; /* tailwind gray-800 */
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: #4b5563; /* tailwind gray-600 */
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: #6b7280; /* tailwind gray-500 */
+}
+
+/* For Firefox */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}

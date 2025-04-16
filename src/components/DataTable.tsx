@@ -178,39 +178,41 @@ export default function DataTable<T extends BaseModel>({
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div>
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
         </div>
       ) : (
         <>
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-700">
-              <tr>
-                {columns.map((column) => (
-                  <th
-                    key={column}
-                    scope="col"
-                    className="px-2 pt-4 pb-2 text-left text-xs font-bold text-gray-100 uppercase tracking-wider"
-                  >
-                    {column}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
-              {data.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-700">
+          <div className="overflow-x-auto scrollbar-custom py-2">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-700">
+                <tr>
                   {columns.map((column) => (
-                    <td key={column} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300">
-                      {formatValue((item as Record<string, unknown>)[column])}
-                    </td>
+                    <th
+                      key={column}
+                      scope="col"
+                      className="px-2 pt-4 pb-2 text-left text-xs font-bold text-gray-100 uppercase tracking-wider"
+                    >
+                      {column}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                {data.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-700">
+                    {columns.map((column) => (
+                      <td key={column} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300">
+                        {formatValue((item as Record<string, unknown>)[column])}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           
           <Pagination
             total={pagination.total}
