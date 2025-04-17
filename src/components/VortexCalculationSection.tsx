@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { VortexCalculationResult, formatNumber } from '@/lib/vortexCalculations';
 import { VortexCalculationModel } from '@/models';
+import BigNumber from 'bignumber.js';
 
 interface VortexCalculationSectionProps {
   accountId: string;
@@ -23,27 +24,27 @@ export default function VortexCalculationSection({
   useEffect(() => {
     const fetchCalculationData = async () => {
       if (!accountId || !vtxDistributionId) return;
-      
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const params = new URLSearchParams({
           accountId,
           vtxDistributionId
         });
-        
+
         if (databaseName) {
           params.append('database', databaseName);
         }
-        
+
         const response = await fetch(`/api/vortexCalculation?${params.toString()}`);
         const result = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(result.error || 'Failed to fetch calculation data');
         }
-        
+
         // Get both input data and results from the API response
         setInputData(result.data);
         setCalculationData(result.results);
@@ -56,19 +57,19 @@ export default function VortexCalculationSection({
         setIsLoading(false);
       }
     };
-    
+
     fetchCalculationData();
   }, [accountId, vtxDistributionId, databaseName]);
-  
+
   // Don't render if both filters aren't active
   if (!accountId || !vtxDistributionId) {
     return null;
   }
-  
+
   return (
     <div className="bg-mid shadow rounded-md border border-primary p-4 mb-4">
       <h2 className="text-xl font-semibold text-primary mb-4">VTX Reward Calculation</h2>
-      
+
       {isLoading ? (
         <div className="text-center p-4">
           <svg className="animate-spin h-5 w-5 text-primary mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -102,7 +103,7 @@ export default function VortexCalculationSection({
                 </tbody>
               </table>
             </div>
-            
+
             <div className="bg-mid-light p-4 rounded-md mt-4">
               <h3 className="text-lg font-medium text-primary mb-3">Total VTX Calculation</h3>
               <table className="w-full text-text">
@@ -123,7 +124,7 @@ export default function VortexCalculationSection({
               </table>
             </div>
           </div>
-          
+
           {/* Second column: Reward Pools and Account Reward */}
           <div>
             <div className="bg-mid-light p-4 rounded-md">
@@ -141,14 +142,14 @@ export default function VortexCalculationSection({
                 </tbody>
               </table>
             </div>
-            
+
             <div className="bg-mid-light p-4 rounded-md mt-4">
               <h3 className="text-lg font-medium text-primary mb-3">Account Reward Calculation</h3>
               <table className="w-full text-text">
                 <tbody>
                   <tr className="border-b border-dark">
                     <td className="py-2 text-text">Staker Point Portion</td>
-                    <td className="py-2 text-right">{(calculationData.accountStakerPointPortion.times(100)).toNumber().toFixed(2)}%</td>
+                    <td className="py-2 text-right">{(new BigNumber(calculationData?.accountStakerPointPortion).times(100)).toNumber().toFixed(2)}%</td>
                   </tr>
                   {inputData && (
                     <tr className="border-b border-dark">
@@ -164,7 +165,7 @@ export default function VortexCalculationSection({
                   )}
                   <tr className="border-b border-dark">
                     <td className="py-2 text-text">Work Points Portion</td>
-                    <td className="py-2 text-right">{(calculationData.accountWorkPointsPortion.times(100)).toNumber().toFixed(2)}%</td>
+                    <td className="py-2 text-right">{(new BigNumber(calculationData?.accountWorkPointsPortion).times(100)).toNumber().toFixed(2)}%</td>
                   </tr>
                   {inputData && (
                     <tr className="border-b border-dark">
@@ -192,4 +193,4 @@ export default function VortexCalculationSection({
       ) : null}
     </div>
   );
-} 
+}

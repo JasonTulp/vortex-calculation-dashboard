@@ -6,6 +6,7 @@ import {
   type NetworkName,
 } from "@therootnetwork/api";
 import "@therootnetwork/api-types";
+import BigNumber from 'bignumber.js';
 
 /**
  * Creates and returns a connection to a Root Network node
@@ -43,6 +44,7 @@ export interface VortexDistributionData {
 export async function getVortexDistributionData(vtxDistributionId: number, accountId: string): Promise<VortexDistributionData> {
   try {
     const api = await getRootApi("local");
+    await api.isReady;
     console.log("Getting Vortex Distribution Data:");
 
     // Fetch all data in parallel
@@ -113,4 +115,4 @@ export async function getVortexDistributionData(vtxDistributionId: number, accou
     console.error("Error fetching vortex distribution data:", error);
     throw error;
   }
-} 
+}
