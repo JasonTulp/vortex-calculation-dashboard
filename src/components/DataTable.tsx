@@ -173,7 +173,9 @@ const generateColumnDefinitions = (data: Record<string, unknown>): ColumnDefinit
 };
 
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
-  return path.split('.').reduce((acc: any, part) => acc && acc[part], obj);
+  return path.split('.').reduce<unknown>((acc, part) => (
+    acc && typeof acc === 'object' ? (acc as Record<string, unknown>)[part] : undefined
+  ), obj);
 };
 
 const formatValue = (value: unknown): string => {

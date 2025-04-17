@@ -6,8 +6,6 @@ import {
   type NetworkName,
 } from "@therootnetwork/api";
 import "@therootnetwork/api-types";
-import {Option} from '@polkadot/types';
-import type { PalletAssetsAssetDetails } from "@polkadot/types/lookup";
 
 /**
  * Creates and returns a connection to a Root Network node
