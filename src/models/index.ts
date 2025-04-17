@@ -9,3 +9,4 @@ export * from './TransactionModel';
 export * from './AssetPriceModel';
 export * from './ValidatorPayoutModel';
 export * from './NominatorPayoutModel'; 
+export * from './VortexCalculationModel'; 

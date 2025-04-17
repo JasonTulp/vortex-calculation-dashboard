@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DataSection from '@/components/DataSection';
+import VortexCalculationSection from '@/components/VortexCalculationSection';
 import { RewardCycleModel } from '@/models';
 
 export default function Home() {
@@ -241,6 +242,15 @@ export default function Home() {
               </div>
             )}
           </div>
+          
+          {/* VTX Calculation Section - Only show when both account and VTX distribution ID are provided */}
+          {appliedAccountId && appliedVtxDistributionId && (
+            <VortexCalculationSection 
+              accountId={appliedAccountId}
+              vtxDistributionId={appliedVtxDistributionId}
+              databaseName={appliedDatabaseName}
+            />
+          )}
           
           {/* Data Sections */}
           

@@ -94,6 +94,12 @@ const Pagination = ({ total, page, limit, pages, onPageChange }: PaginationProps
   );
 };
 
+interface ColumnDefinition {
+  key: string;
+  label: string;
+  subColumns?: ColumnDefinition[];
+}
+
 interface DataTableProps<T extends BaseModel> {
   data: T[];
   pagination: {
@@ -106,7 +112,6 @@ interface DataTableProps<T extends BaseModel> {
   isLoading?: boolean;
 }
 
-// Custom field order definition
 const CUSTOM_FIELD_ORDER = [
   "account",
   "nominator",
@@ -130,6 +135,62 @@ const CUSTOM_FIELD_ORDER = [
   "verified",
 ];
 
+const isObject = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+const generateColumnDefinitions = (data: Record<string, unknown>): ColumnDefinition[] => {
+  const unsortedColumns = Object.entries(data).filter(([key]) => 
+    key !== '_id' && key !== 'createdAt' && key !== 'updatedAt'
+  ).map(([key, value]): ColumnDefinition => {
+    if (isObject(value)) {
+      return {
+        key,
+        label: key.charAt(0).toUpperCase() + key.slice(1),
+        subColumns: Object.keys(value).map(subKey => ({
+          key: `${key}.${subKey}`,
+          label: subKey.charAt(0).toUpperCase() + subKey.slice(1).replace(/([A-Z])/g, ' $1').trim()
+        }))
+      };
+    }
+    return {
+      key,
+      label: key.charAt(0).toUpperCase() + key.slice(1)
+    };
+  });
+
+  return [...unsortedColumns].sort((a, b) => {
+    const indexA = CUSTOM_FIELD_ORDER.findIndex(field => 
+      field.toLowerCase() === a.key.toLowerCase());
+    const indexB = CUSTOM_FIELD_ORDER.findIndex(field => 
+      field.toLowerCase() === b.key.toLowerCase());
+    
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    return 0;
+  });
+};
+
+const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+  return path.split('.').reduce((acc: any, part) => acc && acc[part], obj);
+};
+
+const formatValue = (value: unknown): string => {
+  if (value === null || value === undefined) return '-';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (typeof value === 'object') {
+    if (value instanceof Date) {
+      return value.toLocaleString();
+    }
+    if (isObject(value)) {
+      return ''; // Don't format nested objects as they'll be handled by sub-columns
+    }
+    return JSON.stringify(value);
+  }
+  return String(value);
+};
+
 export default function DataTable<T extends BaseModel>({
   data,
   pagination,
@@ -140,48 +201,7 @@ export default function DataTable<T extends BaseModel>({
     return <div className="text-center p-8 bg-mid-light rounded-lg text-gray-300">No data found</div>;
   }
 
-  // Get column names from the first data item, excluding _id and metadata fields
-  const unsortedColumns = data.length > 0
-    ? Object.keys(data[0]).filter(key => key !== '_id' && key !== 'createdAt' && key !== 'updatedAt')
-    : [];
-  
-  // Sort columns according to custom order
-  const columns = [...unsortedColumns].sort((a, b) => {
-    const indexA = CUSTOM_FIELD_ORDER.findIndex(field => 
-      field.toLowerCase() === a.toLowerCase());
-    const indexB = CUSTOM_FIELD_ORDER.findIndex(field => 
-      field.toLowerCase() === b.toLowerCase());
-    
-    // If both fields are in the custom order list
-    if (indexA !== -1 && indexB !== -1) {
-      return indexA - indexB;
-    }
-    
-    // If only a is in the custom order list
-    if (indexA !== -1) {
-      return -1;
-    }
-    
-    // If only b is in the custom order list
-    if (indexB !== -1) {
-      return 1;
-    }
-    
-    // If neither field is in the custom order list, maintain original order
-    return unsortedColumns.indexOf(a) - unsortedColumns.indexOf(b);
-  });
-
-  const formatValue = (value: unknown): string => {
-    if (value === null || value === undefined) return '-';
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    if (typeof value === 'object') {
-      if (value instanceof Date) {
-        return value.toLocaleString();
-      }
-      return JSON.stringify(value);
-    }
-    return String(value);
-  };
+  const columns = data.length > 0 ? generateColumnDefinitions(data[0] as Record<string, unknown>) : [];
 
   return (
     <div>
@@ -197,23 +217,49 @@ export default function DataTable<T extends BaseModel>({
                 <tr>
                   {columns.map((column) => (
                     <th
-                      key={column}
+                      key={column.key}
+                      colSpan={column.subColumns?.length || 1}
                       scope="col"
-                      className="px-2 pt-4 pb-2 text-left text-xs font-bold text-gray-100 uppercase tracking-wider"
+                      className="px-2 pt-4 pb-2 text-center text-xs font-bold text-gray-100 uppercase tracking-wider border-x border-light"
                     >
-                      {column}
+                      {column.label}
                     </th>
                   ))}
                 </tr>
+                <tr>
+                  {columns.map((column) => 
+                    column.subColumns ? (
+                      column.subColumns.map((subColumn) => (
+                        <th
+                          key={subColumn.key}
+                          scope="col"
+                          className="px-2 py-2 text-left text-xs font-medium text-gray-300 tracking-wider border-x border-light"
+                        >
+                          {subColumn.label}
+                        </th>
+                      ))
+                    ) : (
+                      <th key={`${column.key}-spacer`} className="border-x border-light"></th>
+                    )
+                  )}
+                </tr>
               </thead>
               <tbody className="bg-mid divide-y divide-mid-light">
-                {data.map((item, index) => (
-                  <tr key={index} className="hover:bg-mid-light">
-                    {columns.map((column) => (
-                      <td key={column} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300">
-                        {formatValue((item as Record<string, unknown>)[column])}
-                      </td>
-                    ))}
+                {data.map((item, rowIndex) => (
+                  <tr key={rowIndex} className="hover:bg-mid-light">
+                    {columns.map((column) => 
+                      column.subColumns ? (
+                        column.subColumns.map((subColumn) => (
+                          <td key={subColumn.key} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300 border-x border-light">
+                            {formatValue(getNestedValue(item as Record<string, unknown>, subColumn.key))}
+                          </td>
+                        ))
+                      ) : (
+                        <td key={column.key} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300 border-x border-light">
+                          {formatValue((item as Record<string, unknown>)[column.key])}
+                        </td>
+                      )
+                    )}
                   </tr>
                 ))}
               </tbody>
