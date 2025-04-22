@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const assetPricesRaw = await db.collection('asset-prices')
       .find({ vtxDistributionId: parseInt(vtxDistributionId) })
       .toArray();
-      
+
     // Map the MongoDB documents to the VortexAssetPrice format
     const assetPrices: VortexAssetPrice[] = assetPricesRaw.map(doc => ({
       assetId: doc.assetId,
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       assetId: asset.assetId,
       balance: new BigNumber(asset.balance)
     }));
-    
+
     const feePotAssetBalances = vortexData.feePotAssets.map(asset => ({
       assetId: asset.assetId,
       balance: new BigNumber(asset.balance)
@@ -53,7 +53,8 @@ export async function GET(request: NextRequest) {
     const accountStakerRewardPoints = vortexData.accountRewardPoints;
     const totalStakerRewardPoints = vortexData.totalRewardPoints;
     // TODO get bootstrap root correctly
-    const bootstrapRoot = new BigNumber(3000000); //vortexData.BootstrapRoot;
+    // This for cycle 6 total bootstrap
+    const bootstrapRoot = new BigNumber(17057307006875); //vortexData.BootstrapRoot;
 
     // Calculate VTX price
     const vtxPrice = calculateVtxPrice(
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
     console.log('Total:', totalVortex.toString());
 
     // Calculate account reward
-    const { 
+    const {
       stakerPool,
       workpointPool,
       accountStakerPointPortion,
@@ -135,4 +136,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
