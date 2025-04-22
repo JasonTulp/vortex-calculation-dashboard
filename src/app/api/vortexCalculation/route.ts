@@ -54,7 +54,35 @@ export async function GET(request: NextRequest) {
     const totalStakerRewardPoints = vortexData.totalRewardPoints;
     // TODO get bootstrap root correctly
     // This for cycle 6 total bootstrap
-    const bootstrapRoot = new BigNumber(17057307006875); //vortexData.BootstrapRoot;
+
+    console.log(`Vtx Distribution ID: ${parseInt(vtxDistributionId)}`);
+    const query = [
+      {
+        $match: { vtxDistributionId: parseInt(vtxDistributionId) },
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $convert: {
+                input: '$totalRewardPoints',
+                to: 'double',
+                onError: 0,
+                onNull: 0
+              }
+            }, // Ensure 'reward' is a string that represents a valid number
+          },
+        },
+      },
+    ];
+
+    const model = await db.collection('sign-effective-balances');
+    const rewards = await model.aggregate(query).toArray();
+    const totalBootstrap = await rewards[0]?.total;
+    console.log(totalBootstrap);
+    // return rewards[0].total;
+    const bootstrapRoot = new BigNumber(totalBootstrap); //vortexData.BootstrapRoot;
 
     // Calculate VTX price
     const vtxPrice = calculateVtxPrice(
