@@ -58,7 +58,11 @@ export async function GET(request: NextRequest) {
     console.log(`Vtx Distribution ID: ${parseInt(vtxDistributionId)}`);
     const query = [
       {
-        $match: { vtxDistributionId: parseInt(vtxDistributionId) },
+        $match: { $and:
+              [
+                { vtxDistributionId: parseInt(vtxDistributionId) },
+                { "$expr" : {"$gte" : [{"$toDouble" :"$totalRewardPoints"} , 0]}}
+              ]},
       },
       {
         $group: {
