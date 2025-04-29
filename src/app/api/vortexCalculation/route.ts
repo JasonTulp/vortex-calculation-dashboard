@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const assetPricesRaw = await db.collection('asset-prices')
       .find({ vtxDistributionId: parseInt(vtxDistributionId) })
       .toArray();
-      
+
     // Map the MongoDB documents to the VortexAssetPrice format
     const assetPrices: VortexAssetPrice[] = assetPricesRaw.map(doc => ({
       assetId: doc.assetId,
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       assetId: asset.assetId,
       balance: new BigNumber(asset.balance)
     }));
-    
+
     const feePotAssetBalances = vortexData.feePotAssets.map(asset => ({
       assetId: asset.assetId,
       balance: new BigNumber(asset.balance)
@@ -53,7 +53,40 @@ export async function GET(request: NextRequest) {
     const accountStakerRewardPoints = vortexData.accountRewardPoints;
     const totalStakerRewardPoints = vortexData.totalRewardPoints;
     // TODO get bootstrap root correctly
-    const bootstrapRoot = new BigNumber(3000000); //vortexData.BootstrapRoot;
+    // This for cycle 6 total bootstrap
+
+    console.log(`Vtx Distribution ID: ${parseInt(vtxDistributionId)}`);
+    const query = [
+      {
+        $match: { $and:
+              [
+                { vtxDistributionId: parseInt(vtxDistributionId) },
+                { "$expr" : {"$gte" : [{"$toDouble" :"$totalRewardPoints"} , 0]}}
+              ]},
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $convert: {
+                input: '$totalRewardPoints',
+                to: 'double',
+                onError: 0,
+                onNull: 0
+              }
+            }, // Ensure 'reward' is a string that represents a valid number
+          },
+        },
+      },
+    ];
+
+    const model = await db.collection('sign-effective-balances');
+    const rewards = await model.aggregate(query).toArray();
+    const totalBootstrap = await rewards[0]?.total;
+    console.log(totalBootstrap);
+    // return rewards[0].total;
+    const bootstrapRoot = new BigNumber(totalBootstrap); //vortexData.BootstrapRoot;
 
     // Calculate VTX price
     const vtxPrice = calculateVtxPrice(
@@ -80,7 +113,7 @@ export async function GET(request: NextRequest) {
     console.log('Total:', totalVortex.toString());
 
     // Calculate account reward
-    const { 
+    const {
       stakerPool,
       workpointPool,
       accountStakerPointPortion,
@@ -135,4 +168,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
