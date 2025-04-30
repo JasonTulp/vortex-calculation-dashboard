@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DataSection from '@/components/DataSection';
 import VortexCalculationSection from '@/components/VortexCalculationSection';
+import Description from '@/components/Description';
 import { RewardCycleModel } from '@/models';
 
 export default function Home() {
@@ -131,6 +132,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-dark">
       <div className="max-w-[1800px] mx-auto py-6 sm:px-6 lg:px-8">
+        <Description />
         <div className="px-4 py-6 sm:px-0">
           {/* Filter controls */}
           <div className="bg-mid shadow rounded-md border border-primary p-4 mb-4">
@@ -220,7 +222,7 @@ export default function Home() {
             
             {rewardCycleData && (
               <div className="mt-4 p-3 bg-mid-light rounded">
-                <h3 className="text-lg font-medium text-gray-100 mb-2">Reward Cycle {rewardCycleData.vtxDistributionId} Details</h3>
+                <h3 className="text-lg font-medium text-text mb-2">Reward Cycle {rewardCycleData.vtxDistributionId} Details</h3>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                   <div>
                     <p className="text-sm text-gray-400">Start Block</p>
@@ -257,14 +259,37 @@ export default function Home() {
           <DataSection
             title="Reward Cycles"
             collectionName="reward-cycle"
+            description="List of previous and current reward cycles and the block range that they cover. If the End Era Index is -1 it means the cycle is still active."
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('reward-cycle')}
             refreshTrigger={counter}
+          />
+
+          <DataSection
+              title="Submitted Reward Points"
+              collectionName="sign-effective-balances"
+              description="All submitted reward points for a specific cycle. The reward points per account are calculated from the effective balances over the cycle range."
+              accountId={appliedAccountId}
+              databaseName={appliedDatabaseName || undefined}
+              customFilters={getCustomFilters('sign-effective-balances')}
+              refreshTrigger={counter}
+              columnBlacklist={['timestamp', 'signature']}
+          />
+
+          <DataSection
+              title="Effective Balances"
+              collectionName="effective-balances"
+              description="Effective balances show the bonded and unlocking balances for an account. A new effective balance will be created every time there is a change in bonded balance, unlocking balance or staker type."
+              accountId={appliedAccountId}
+              databaseName={appliedDatabaseName || undefined}
+              customFilters={getCustomFilters('effective-balances')}
+              refreshTrigger={counter}
           />
           
           <DataSection
             title="Balances"
             collectionName="balances"
+            description="The Balances table shows the raw balance ledger built from block 0. Any change in balance due to bonding, unbonding, withdraw or rebond event will create a new balance entry here"
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('balances')}
@@ -272,26 +297,9 @@ export default function Home() {
           />
           
           <DataSection
-            title="Effective Balances"
-            collectionName="effective-balances"
-            accountId={appliedAccountId}
-            databaseName={appliedDatabaseName || undefined}
-            customFilters={getCustomFilters('effective-balances')}
-            refreshTrigger={counter}
-          />
-          
-          <DataSection
-            title="Signed Effective Balances"
-            collectionName="sign-effective-balances"
-            accountId={appliedAccountId}
-            databaseName={appliedDatabaseName || undefined}
-            customFilters={getCustomFilters('sign-effective-balances')}
-            refreshTrigger={counter}
-          />
-          
-          <DataSection
             title="Transactions"
             collectionName="transactions"
+            description="The transactions table shows all bonded, unbonded, rebonded, withdrawn and slashed events that have happened on chain. This is the raw data used to calculate the balance ledger for each account"
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('transactions')}
@@ -299,8 +307,19 @@ export default function Home() {
           />
 
           <DataSection
-            title="Chilled Accounts"
+              title="Stakers"
+              collectionName="stakers"
+              description="This table contains data for all Nominators and Validators per era. The staker type for reward points will be calculated based on their staker type in this table unless the account has chilled."
+              accountId={appliedAccountId}
+              databaseName={appliedDatabaseName || undefined}
+              customFilters={getCustomFilters('stakers')}
+              refreshTrigger={counter}
+          />
+
+          <DataSection
+            title="Chilled"
             collectionName="chilled"
+            description="Any time an account is chilled it will show up here, if an account is a validator or nominator and chills, they will be paid out the staker rate for their reward points in that era."
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('chilled')}
@@ -310,6 +329,7 @@ export default function Home() {
           <DataSection
             title="Asset Prices"
             collectionName="asset-prices"
+            description="For each reward cycle, the current USD price of each asset contained in the pool is captured and stored at the time of payout. This is used to calculate the portions of each asset in the payout"
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('asset-prices')}
             refreshTrigger={counter}
@@ -318,6 +338,7 @@ export default function Home() {
           <DataSection
             title="Validator Payouts"
             collectionName="validator-payouts"
+            description="Shows the payout made for the validator portion. This is calculated from their portion multiplied by total staked, taking into account their commission rate."
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('validator-payouts')}
@@ -327,19 +348,11 @@ export default function Home() {
           <DataSection
             title="Nominator Payouts"
             collectionName="nominator-payouts"
+            description="The nominator payouts shows an entry for each era where they have nominated stake on a validator. The percentage shows the portion of the validators total stake that their contribution made up."
             accountId={appliedAccountId}
             databaseName={appliedDatabaseName || undefined}
             customFilters={getCustomFilters('nominator-payouts')}
             refreshTrigger={counter}
-          />
-
-          <DataSection
-              title="Stakers"
-              collectionName="stakers"
-              accountId={appliedAccountId}
-              databaseName={appliedDatabaseName || undefined}
-              customFilters={getCustomFilters('stakers')}
-              refreshTrigger={counter}
           />
 
         </div>

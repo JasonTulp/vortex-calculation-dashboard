@@ -52,11 +52,9 @@ export function calculateVtx(
   
   // Calculate bootstrap amount
   const bootstrapAssetValue = bootstrapRoot.times(rootPrice);
-  
   // Convert to VTX tokens
   const totalVortexNetworkReward = feeVaultAssetValue.dividedBy(vtxPrice);
   const totalVortexBootstrap = bootstrapAssetValue.dividedBy(vtxPrice);
-  
   // Total vortex tokens
   const totalVortex = totalVortexNetworkReward.plus(totalVortexBootstrap);
   

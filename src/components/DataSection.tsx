@@ -7,19 +7,23 @@ import DataTable from './DataTable';
 interface DataSectionProps {
   title: string;
   collectionName: string;
+  description?: string;
   accountId?: string;
   databaseName?: string;
   customFilters?: Record<string, unknown>;
   refreshTrigger?: number;
+  columnBlacklist?: string[];
 }
 
 export default function DataSection({ 
   title, 
-  collectionName, 
+  collectionName,
+  description,
   accountId,
   databaseName,
   customFilters = {},
-  refreshTrigger = 0
+  refreshTrigger = 0,
+  columnBlacklist = []
 }: DataSectionProps) {
   const [data, setData] = useState<BaseModel[]>([]);
   const [pagination, setPagination] = useState({
@@ -100,10 +104,15 @@ export default function DataSection({
   return (
     <div className={`bg-mid shadow rounded-md p-2 mb-4 ${isExpanded ? 'border border-mid-light': ''}`}>
       <div 
-        className="flex justify-between items-center cursor-pointer p-2 rounded"
+        className="flex justify-between items-center cursor-pointer p-2 space-x-2 rounded"
         onClick={toggleExpand}
       >
-        <h2 className="text-xl font-semibold text-primary">{title}</h2>
+        <div>
+          <h2 className="text-xl font-semibold text-primary">{title}</h2>
+          {description && (
+            <p className="text-sm text-text mt-1">{description}</p>
+          )}
+        </div>
         <div 
           className="text-text transition-transform duration-200"
           aria-hidden="true"
@@ -132,6 +141,7 @@ export default function DataSection({
               pagination={pagination}
               onPageChange={handlePageChange}
               isLoading={isLoading}
+              columnBlacklist={columnBlacklist}
             />
           )}
         </>

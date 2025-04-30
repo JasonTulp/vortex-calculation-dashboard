@@ -25,7 +25,11 @@ export async function GET(request: NextRequest) {
 
     // Start with basic query
     const query: Record<string, unknown> = {};
-    
+
+    if (process.env.NEXT_PUBLIC_DEBUG_LEVEL != "debug") {
+      query.vtxDistributionId = { $gte: 6 };
+    }
+
     // Add account filter if provided
     if (accountId) {
       if (collectionName === 'validator-payouts') {
@@ -66,7 +70,7 @@ export async function GET(request: NextRequest) {
     // Fetch paginated documents
     const docs = await collection
       .find(query)
-      .sort({ _id: -1 })
+      .sort({ vtxDistributionId: -1, startBlock: -1, blockNumber: -1, eraIndex: -1, _id: -1 })
       .skip(skip)
       .limit(limit)
       .toArray();

@@ -1,98 +1,9 @@
 'use client';
 
 import { BaseModel } from '@/models';
-
-interface PaginationProps {
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-  onPageChange: (page: number) => void;
-}
-
-const Pagination = ({ total, page, limit, pages, onPageChange }: PaginationProps) => {
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxPagesToShow = 5;
-    
-    if (pages <= maxPagesToShow) {
-      // Show all pages if there are less than maxPagesToShow
-      for (let i = 1; i <= pages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      // Always include first page
-      pageNumbers.push(1);
-      
-      // Add ellipsis if current page is more than 3
-      if (page > 3) {
-        pageNumbers.push('...');
-      }
-      
-      // Add pages around current page
-      const startPage = Math.max(2, page - 1);
-      const endPage = Math.min(pages - 1, page + 1);
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
-      }
-      
-      // Add ellipsis if current page is less than pages - 2
-      if (page < pages - 2) {
-        pageNumbers.push('...');
-      }
-      
-      // Always include last page
-      if (pages > 1) {
-        pageNumbers.push(pages);
-      }
-    }
-    
-    return pageNumbers;
-  };
-
-  return (
-    <div className="flex items-center justify-between mt-6">
-      <div className="text-sm text-gray-300">
-        Showing {Math.min((page - 1) * limit + 1, total)} to {Math.min(page * limit, total)} of {total} results
-      </div>
-      <div className="flex space-x-2">
-        <button
-          onClick={() => page > 1 && onPageChange(page - 1)}
-          disabled={page === 1}
-          className="px-4 py-2 rounded bg-mid-light text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Previous
-        </button>
-        
-        {getPageNumbers().map((pageNumber, index) => (
-          <button
-            key={index}
-            onClick={() => typeof pageNumber === 'number' && onPageChange(pageNumber)}
-            className={`px-4 py-2 rounded ${
-              pageNumber === page
-                ? 'bg-primary text-white'
-                : pageNumber === '...'
-                ? 'bg-mid-light text-gray-300 cursor-default'
-                : 'bg-mid-light text-gray-300 hover:bg-light'
-            }`}
-            disabled={pageNumber === '...'}
-          >
-            {pageNumber}
-          </button>
-        ))}
-        
-        <button
-          onClick={() => page < pages && onPageChange(page + 1)}
-          disabled={page === pages}
-          className="px-4 py-2 rounded bg-mid-light text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
-};
+import { shouldHideColumn } from '@/config/debug';
+import { Pagination } from './Pagination';
+import BigNumber from 'bignumber.js';
 
 interface ColumnDefinition {
   key: string;
@@ -110,6 +21,7 @@ interface DataTableProps<T extends BaseModel> {
   };
   onPageChange: (page: number) => void;
   isLoading?: boolean;
+  columnBlacklist?: string[];
 }
 
 const CUSTOM_FIELD_ORDER = [
@@ -139,18 +51,20 @@ const isObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
 
-const generateColumnDefinitions = (data: Record<string, unknown>): ColumnDefinition[] => {
+const generateColumnDefinitions = (data: Record<string, unknown>, columnBlacklist: string[] = []): ColumnDefinition[] => {
   const unsortedColumns = Object.entries(data).filter(([key]) => 
-    key !== '_id' && key !== 'createdAt' && key !== 'updatedAt'
+    key !== '_id' && key !== 'createdAt' && key !== 'updatedAt' && !shouldHideColumn(key, columnBlacklist)
   ).map(([key, value]): ColumnDefinition => {
     if (isObject(value)) {
       return {
         key,
-        label: key.charAt(0).toUpperCase() + key.slice(1),
-        subColumns: Object.keys(value).map(subKey => ({
-          key: `${key}.${subKey}`,
-          label: subKey.charAt(0).toUpperCase() + subKey.slice(1).replace(/([A-Z])/g, ' $1').trim()
-        }))
+        label: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
+        subColumns: Object.keys(value)
+          .filter(subKey => !shouldHideColumn(`${key}.${subKey}`, columnBlacklist))
+          .map(subKey => ({
+            key: `${key}.${subKey}`,
+            label: subKey.charAt(0).toUpperCase() + subKey.slice(1).replace(/([A-Z])/g, ' $1').trim()
+          }))
       };
     }
     return {
@@ -178,7 +92,7 @@ const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => 
   ), obj);
 };
 
-const formatValue = (value: unknown): string => {
+const formatValue = (value: unknown, key: string): string => {
   if (value === null || value === undefined) return '-';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'object') {
@@ -190,6 +104,34 @@ const formatValue = (value: unknown): string => {
     }
     return JSON.stringify(value);
   }
+
+  // Special formatting for balance-related fields
+  const balanceFields = [
+    'balance',
+    'effectivebalance',
+    'rewardpoints',
+    'previousbalance',
+    'balancechange',
+    'balanceinblockrange',
+    'amount',
+    'totalstake',
+    'price'
+  ];
+
+  if (balanceFields.includes(key.toLowerCase())) {
+    try {
+      if (value.toString() === "0") {
+        return "-";
+      }
+      const val = new BigNumber(value.toString());
+      if (!val.isNaN()) {
+        return val.div(1000000).toFixed(6);
+      }
+    } catch (err) {
+      console.error(`Error formatting value for ${key}:`, err);
+    }
+  }
+
   return String(value);
 };
 
@@ -198,12 +140,13 @@ export default function DataTable<T extends BaseModel>({
   pagination,
   onPageChange,
   isLoading = false,
+  columnBlacklist = []
 }: DataTableProps<T>) {
   if (data.length === 0 && !isLoading) {
     return <div className="text-center p-8 bg-mid-light rounded-lg text-gray-300">No data found</div>;
   }
 
-  const columns = data.length > 0 ? generateColumnDefinitions(data[0] as Record<string, unknown>) : [];
+  const columns = data.length > 0 ? generateColumnDefinitions(data[0] as Record<string, unknown>, columnBlacklist) : [];
 
   return (
     <div>
@@ -214,15 +157,15 @@ export default function DataTable<T extends BaseModel>({
       ) : (
         <>
           <div className="overflow-x-auto scrollbar-custom py-2">
-            <table className="min-w-full divide-y divide-mid-light">
-              <thead className="bg-mid-light">
+            <table className="min-w-full divide-y divide-mid-light border-light border-b">
+              <thead className="bg-mid-light border-t border-light">
                 <tr>
                   {columns.map((column) => (
                     <th
                       key={column.key}
                       colSpan={column.subColumns?.length || 1}
                       scope="col"
-                      className="px-2 pt-4 pb-2 text-center text-xs font-bold text-gray-100 uppercase tracking-wider border-x border-light"
+                      className="px-2 pt-4 pb-1 text-center text-xs font-bold text-text uppercase tracking-wider border-x border-light"
                     >
                       {column.label}
                     </th>
@@ -235,7 +178,7 @@ export default function DataTable<T extends BaseModel>({
                         <th
                           key={subColumn.key}
                           scope="col"
-                          className="px-2 py-2 text-left text-xs font-medium text-gray-300 tracking-wider border-x border-light"
+                          className="px-2 py-2 text-left text-xs font-medium text-gray-300 tracking-wider border-x border-light border-t"
                         >
                           {subColumn.label}
                         </th>
@@ -252,13 +195,13 @@ export default function DataTable<T extends BaseModel>({
                     {columns.map((column) => 
                       column.subColumns ? (
                         column.subColumns.map((subColumn) => (
-                          <td key={subColumn.key} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300 border-x border-light">
-                            {formatValue(getNestedValue(item as Record<string, unknown>, subColumn.key))}
+                          <td key={subColumn.key} className="px-2 py-2 whitespace-nowrap text-sm text-gray-300 border-x border-light">
+                            {formatValue(getNestedValue(item as Record<string, unknown>, subColumn.key), subColumn.key.split('.').pop() || '')}
                           </td>
                         ))
                       ) : (
-                        <td key={column.key} className="px-2 py-3 whitespace-nowrap text-sm text-gray-300 border-x border-light">
-                          {formatValue((item as Record<string, unknown>)[column.key])}
+                        <td key={column.key} className="px-2 py-2 whitespace-nowrap text-sm text-gray-300 border-x border-light">
+                          {formatValue((item as Record<string, unknown>)[column.key], column.key)}
                         </td>
                       )
                     )}

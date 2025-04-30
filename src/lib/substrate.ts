@@ -76,19 +76,6 @@ export async function getVortexDistributionData(vtxDistributionId: number, accou
     const feePotAssetsJson = feePotAssets.toJSON() as Array<[number, string]>;
     const vtxVaultAssetsJson = vtxVaultAssets.toJSON() as Array<[number, string]>;
 
-    // log all results
-    console.log("Vortex Distribution Data:");
-    console.log(feePotAssetsJson);
-    console.log(vtxVaultAssetsJson);
-    console.log(totalNetworkReward.toString());
-    console.log(totalBootstrapReward.toString());
-    console.log(totalVortex.toString());
-    console.log(vtxCurrentSupply.unwrap().supply.toString());
-    console.log(totalWorkPoints.toString());
-    console.log(totalRewardPoints.toString());
-    console.log(accountWorkPoints.toString());
-    console.log(accountRewardPoints.toString());
-
     // Convert the raw chain data to our interface format
     const result: VortexDistributionData = {
       feePotAssets: feePotAssetsJson.map(([assetId, balance]) => ({

@@ -26,7 +26,7 @@ A MongoDB data dashboard for viewing various collections from the Vortex databas
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Create a `.env.local` file in the root directory based on the `.env.local.example` file:
@@ -42,18 +42,12 @@ Replace with your actual MongoDB connection string, but without specifying a dat
 Run the development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Using the Dashboard
-
-### Database Selection
-- Enter the database name in the "Database Name" field.
-- This corresponds to the database part of a MongoDB connection string: `mongodb://username:password@hostname:port/database`
-- The connection string in .env.local should NOT include a database name as it will be provided through this field
-
 ### Account Filtering
 - Enter an account ID (0x followed by 40 hex characters) to filter all data sections
 - This will limit results to only show data for the specified account
@@ -71,13 +65,13 @@ The application is designed to work with the following MongoDB collections in yo
 ## Building for Production
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Then start the production server:
 
 ```bash
-npm start
+pnpm start
 ```
 
 ## License
