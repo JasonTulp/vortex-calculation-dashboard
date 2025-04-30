@@ -2,7 +2,7 @@ import React from 'react';
 
 const Description = () => {
   return (
-    <div className="bg-dark shadow border border-mid p-8 rounded-md">
+    <div className="bg-dark shadow-xl shadow-black border border-mid-light p-8 rounded-md">
       <div className="max-w-[1800px] mx-auto">
         <h1 className="text-3xl font-bold text-primary mb-4">
           Vortex Distribution Dashboard

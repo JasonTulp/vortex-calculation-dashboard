@@ -30,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-darker`}
       >
-        <header className="bg-mid shadow pt-16 border-b border-light">
+        <header className="bg-mid shadow-xl shadow-black pt-16 border-b border-light">
           <div className="max-w-[1800px] mx-auto py-4 px-4 sm:px-6 lg:px-8 flex items-center gap-4">
             <Image
               src="/TRN-Logo.svg"
