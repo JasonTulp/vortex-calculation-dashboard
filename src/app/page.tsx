@@ -11,7 +11,7 @@ export default function Home() {
   const [accountId, setAccountId] = useState('');
   const [counter, setCounter] = useState(0);
   const [vtxDistributionId, setVtxDistributionId] = useState('');
-  const [appliedDatabaseName, setAppliedDatabaseName] = useState('');
+  const [appliedDatabaseName, setAppliedDatabaseName] = useState('mainnet-test');
   const [appliedAccountId, setAppliedAccountId] = useState('');
   const [appliedVtxDistributionId, setAppliedVtxDistributionId] = useState('');
   const [rewardCycleData, setRewardCycleData] = useState<RewardCycleModel | null>(null);
