@@ -7,7 +7,7 @@ import Description from '@/components/Description';
 import { RewardCycleModel } from '@/models';
 
 export default function Home() {
-  const [databaseName, setDatabaseName] = useState('');
+  const [databaseName, setDatabaseName] = useState('mainnet-test');
   const [accountId, setAccountId] = useState('');
   const [counter, setCounter] = useState(0);
   const [vtxDistributionId, setVtxDistributionId] = useState('');
